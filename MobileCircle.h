@@ -12,6 +12,9 @@ class MobileCircle: public sf::Drawable {
 		sf::Texture circleTexture;
 
 		const int maxSpeed = 40;
+		const int slowDownZoneSize = 70;
+		const int minSpeedPercentage = 5;
+		const int msToSlowDown = 10;
 		double speed;
 		bool isMoving;
 
@@ -19,6 +22,8 @@ class MobileCircle: public sf::Drawable {
 
 	private:
 		void matchBounds();
+		void regulateSpeed();
+		void slowDown();
 
 	public:
 		MobileCircle();

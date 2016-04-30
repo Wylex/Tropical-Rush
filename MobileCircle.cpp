@@ -1,5 +1,4 @@
 #include "MobileCircle.h"
-#include <iostream>
 
 MobileCircle::MobileCircle() {
 	//Rail
@@ -15,19 +14,8 @@ MobileCircle::MobileCircle() {
 	circle.setPosition(horizontalPosition + rail.getGlobalBounds().width/2 - circle.getGlobalBounds().width/2, verticalPosition - 8);
 
 	isMoving = false;
-	speed = maxSpeed;
+	speed = 0;
 	direction = Right;
-}
-
-void MobileCircle::matchBounds() {
-	if(circle.getGlobalBounds().left + circle.getGlobalBounds().width > rail.getGlobalBounds().left + rail.getGlobalBounds().width) {
-		direction = Left;
-		circle.setPosition(rail.getGlobalBounds().left + rail.getGlobalBounds().width - circle.getGlobalBounds().width, circle.getGlobalBounds().top);
-	}
-	else if(circle.getGlobalBounds().left < rail.getGlobalBounds().left) {
-		direction = Right;
-		circle.setPosition(rail.getGlobalBounds().left, circle.getGlobalBounds().top);
-	}
 }
 
 void MobileCircle::move() {
@@ -39,45 +27,46 @@ void MobileCircle::move() {
 	matchBounds();
 }
 
-void MobileCircle::update() {
+void MobileCircle::regulateSpeed() {
 	sf::FloatRect circlePosition = circle.getGlobalBounds();
 	sf::FloatRect railPosition = rail.getGlobalBounds();
-	int slowDownZoneSize = 70;
-	int minSpeedPercentage = 5;
 
-	/*
-		|-----|---------------|-----|
-		5%   100%
-	*/
+	//Slow down when getting close to borders
+	if((circlePosition.left - railPosition.left) < slowDownZoneSize) {
+		double speedPercentage = (circlePosition.left - railPosition.left) * (100 - minSpeedPercentage) / slowDownZoneSize + minSpeedPercentage;
+		speedPercentage /= 100.0;
 
-	//Regulate speed when getting close to borders
-	if(isMoving) {
-		std::cout << "---" << std::endl;
-		if((circlePosition.left - railPosition.left) < slowDownZoneSize) {
-			double speedPercentage = (circlePosition.left - railPosition.left) * (100 - minSpeedPercentage) / slowDownZoneSize + minSpeedPercentage;
-			speedPercentage /= 100.0;
-
-			speed = speedPercentage * maxSpeed;
-
-			//std::cout << "---" << std::endl;
-		}
-		else if(circlePosition.left + circlePosition.width > (railPosition.left + railPosition.width) - slowDownZoneSize) {
-			double speedPercentage = (railPosition.left + railPosition.width) - (circlePosition.left + circlePosition.width);
-			speedPercentage = speedPercentage * (100 - minSpeedPercentage) / slowDownZoneSize + minSpeedPercentage;
-			speedPercentage /= 100.0;
-
-			speed = speedPercentage * maxSpeed;
-		}
-		else
-			speed = maxSpeed;
+		speed = speedPercentage * maxSpeed;
 	}
+	else if(circlePosition.left + circlePosition.width > (railPosition.left + railPosition.width) - slowDownZoneSize) {
+		double speedPercentage = (railPosition.left + railPosition.width) - (circlePosition.left + circlePosition.width);
+		speedPercentage = speedPercentage * (100 - minSpeedPercentage) / slowDownZoneSize + minSpeedPercentage;
+		speedPercentage /= 100.0;
 
-	//Slow down if not moving
-	/*if(!isMoving and speed != 0) {
-		speed -= maxSpeed/50.0;
-		if(speed < 0)
-			speed = 0;
-	}*/
+		speed = speedPercentage * maxSpeed;
+	}
+	else
+		speed = maxSpeed;
+}
+
+void MobileCircle::slowDown() {
+	speed -= maxSpeed/20.0;
+	if(speed < 0)
+		speed = 0;
+}
+
+void MobileCircle::update() {
+	//Regulate speed while moving
+	if(isMoving)
+		regulateSpeed();
+
+	//Slow down if not moving (and keep moving)
+	static sf::Clock timeSinceLastDecrease;
+	if(!isMoving and speed != 0 and timeSinceLastDecrease.getElapsedTime().asMilliseconds() > msToSlowDown) {
+		slowDown();
+		move();
+		timeSinceLastDecrease.restart();
+	}
 }
 
 void MobileCircle::draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -91,4 +80,15 @@ void MobileCircle::setIsMoving(bool mv) {
 
 sf::FloatRect MobileCircle::getGlobalBounds() const {
 	return circle.getGlobalBounds();
+}
+
+void MobileCircle::matchBounds() {
+	if(circle.getGlobalBounds().left + circle.getGlobalBounds().width > rail.getGlobalBounds().left + rail.getGlobalBounds().width) {
+		direction = Left;
+		circle.setPosition(rail.getGlobalBounds().left + rail.getGlobalBounds().width - circle.getGlobalBounds().width, circle.getGlobalBounds().top);
+	}
+	else if(circle.getGlobalBounds().left < rail.getGlobalBounds().left) {
+		direction = Right;
+		circle.setPosition(rail.getGlobalBounds().left, circle.getGlobalBounds().top);
+	}
 }
