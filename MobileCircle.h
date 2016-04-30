@@ -11,14 +11,14 @@ class MobileCircle: public sf::Drawable {
 		sf::Sprite circle;
 		sf::Texture circleTexture;
 
-		const int maxSpeed = 50;
-		int speed;
+		const int maxSpeed = 40;
+		double speed;
 		bool isMoving;
 
 		enum {Right, Left} direction;
 
-	/*private:
-		void slowDown(int drop);*/
+	private:
+		void matchBounds();
 
 	public:
 		MobileCircle();
