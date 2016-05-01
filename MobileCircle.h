@@ -13,7 +13,7 @@ class MobileCircle: public sf::Drawable {
 
 		const int maxSpeed = 40;
 		const int slowDownZoneSize = 70;
-		const int minSpeedPercentage = 5;
+		const int minSpeedPercentage = 10;
 		const int msToSlowDown = 10;
 		double speed;
 		bool isMoving;
@@ -21,7 +21,11 @@ class MobileCircle: public sf::Drawable {
 		enum {Right, Left} direction;
 
 	private:
-		void matchBounds();
+		bool isInsideBounds() const;
+		void changeDirection();
+		void fitInsideBounds();
+
+		void keepCircleInsideRail();
 		void regulateSpeed();
 		void slowDown();
 

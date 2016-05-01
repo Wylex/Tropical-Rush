@@ -1,21 +1,60 @@
 #include "MobileCircle.h"
 
 MobileCircle::MobileCircle() {
-	//Rail
+	//Rail and Circle
 	railTexture.loadFromFile("Resources/rail.png");
 	rail.setTexture(railTexture);
-	//Circle
 	circleTexture.loadFromFile("Resources/circle.png");
 	circle.setTexture(circleTexture);
 
+	//Set position
 	const int verticalPosition = 290;
 	const int horizontalPosition = 30;
 	rail.setPosition(horizontalPosition, verticalPosition);
 	circle.setPosition(horizontalPosition + rail.getGlobalBounds().width/2 - circle.getGlobalBounds().width/2, verticalPosition - 8);
 
+	//Initialize variables
 	isMoving = false;
 	speed = 0;
 	direction = Right;
+}
+
+bool MobileCircle::isInsideBounds() const {
+	double circleRightCoordinate = circle.getGlobalBounds().left + circle.getGlobalBounds().width;
+	double railRightCoordinate = rail.getGlobalBounds().left + rail.getGlobalBounds().width;
+
+	bool insideBounds = true;
+
+	if(circleRightCoordinate > railRightCoordinate)
+		insideBounds = false;
+	else if(circle.getGlobalBounds().left < rail.getGlobalBounds().left)
+		insideBounds = false;
+
+	return insideBounds;
+}
+
+void MobileCircle::changeDirection() {
+	if(direction == Left)
+		direction = Right;
+	else
+		direction = Left;
+}
+
+void MobileCircle::fitInsideBounds() {
+	double circleRightCoordinate = circle.getGlobalBounds().left + circle.getGlobalBounds().width;
+	double railRightCoordinate = rail.getGlobalBounds().left + rail.getGlobalBounds().width;
+
+	if(circleRightCoordinate > railRightCoordinate)
+		circle.setPosition(railRightCoordinate - circle.getGlobalBounds().width, circle.getGlobalBounds().top);
+	else if(circle.getGlobalBounds().left < rail.getGlobalBounds().left)
+		circle.setPosition(rail.getGlobalBounds().left, circle.getGlobalBounds().top);
+}
+
+void MobileCircle::keepCircleInsideRail() {
+	if(!isInsideBounds()) {
+		fitInsideBounds();
+		changeDirection();
+	}
 }
 
 void MobileCircle::move() {
@@ -24,7 +63,7 @@ void MobileCircle::move() {
 	else
 		circle.move(-speed/10.0, 0);
 
-	matchBounds();
+	keepCircleInsideRail();
 }
 
 void MobileCircle::regulateSpeed() {
@@ -50,8 +89,8 @@ void MobileCircle::regulateSpeed() {
 }
 
 void MobileCircle::slowDown() {
-	speed -= maxSpeed/20.0;
-	if(speed < 0)
+	speed *= 0.95;
+	if(speed < 1)
 		speed = 0;
 }
 
@@ -69,11 +108,6 @@ void MobileCircle::update() {
 	}
 }
 
-void MobileCircle::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	target.draw(rail, states);
-	target.draw(circle, states);
-}
-
 void MobileCircle::setIsMoving(bool mv) {
 	isMoving = mv;
 }
@@ -82,13 +116,7 @@ sf::FloatRect MobileCircle::getGlobalBounds() const {
 	return circle.getGlobalBounds();
 }
 
-void MobileCircle::matchBounds() {
-	if(circle.getGlobalBounds().left + circle.getGlobalBounds().width > rail.getGlobalBounds().left + rail.getGlobalBounds().width) {
-		direction = Left;
-		circle.setPosition(rail.getGlobalBounds().left + rail.getGlobalBounds().width - circle.getGlobalBounds().width, circle.getGlobalBounds().top);
-	}
-	else if(circle.getGlobalBounds().left < rail.getGlobalBounds().left) {
-		direction = Right;
-		circle.setPosition(rail.getGlobalBounds().left, circle.getGlobalBounds().top);
-	}
+void MobileCircle::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	target.draw(rail, states);
+	target.draw(circle, states);
 }

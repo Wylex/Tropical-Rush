@@ -39,7 +39,6 @@ void World::handleInput() {
 	}
 
 	static sf::Clock timeSinceLastMove;
-
 	if(timeSinceLastMove.getElapsedTime().asMilliseconds() > 20) {
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
 			player.move();
