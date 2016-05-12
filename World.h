@@ -2,7 +2,10 @@
 #define WORLD_H
 
 #include <SFML/Graphics.hpp>
+#include <vector>
 #include "MobileCircle.h"
+#include "TexturesHolder.h"
+#include "Bird.h"
 
 class World {
 	private:
@@ -14,13 +17,16 @@ class World {
 
 		sf::RenderWindow window;
 		MobileCircle player;
+		std::vector<Bird> bird;
 
-	private:
-		void handleInput();
+		TexturesHolder texturesHolder;
 
 	public:
 		World();
 		void start();
+
+	private:
+		void handleInput();
 };
 
 #endif

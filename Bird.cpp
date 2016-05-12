@@ -1,40 +1,70 @@
 #include "Bird.h"
 #include <ctime>
 #include <cstdlib>
+#include <string>
 
-Bird::Bird(sf::FloatRect goThroughAreaArg, Direction directionArg): windowArea(0, 0, 480, 350) {
+Bird::Bird(const TexturesHolder& textureHolder, Direction directionArg) {
 
 	std::srand(time(NULL));
 
 	direction = directionArg;
-	goThroughArea = goThroughAreaArg;
+	animationSpriteFrame = 0;
+	windowArea = sf::FloatRect(0, 0, 480, 350);
+	goThroughArea = sf::FloatRect(0, 0, 0, 0);
 
-	if(direction == Right) {
-		birdTexture.loadFromFile("");
-		bird.setTexture(birdTexture);
-		bird.setPosition(0 - bird.getGlobalBounds().width, 0);
-	}
-	else {
-		birdTexture.loadFromFile("");
-		bird.setTexture(birdTexture);
-		bird.setPosition(goThroughArea.width, 0);
-	}
+	buildBird(textureHolder);
+}
 
-	int birdHeight = bird.getGlobalBounds().height;
+void Bird::buildBird(const TexturesHolder& textureHolder) {
+	const int numberOfFrames = 10;
+	setSpriteNumber(numberOfFrames);
+	setBirdTextures(textureHolder, numberOfFrames);
+	setBirdInitialPosition();
+}
+
+void Bird::setSpriteNumber(int numFrames) {
+	birds.resize(numFrames);
+}
+
+void Bird::setBirdTextures(const TexturesHolder& textures, int numFrames) {
+	std::vector<std::shared_ptr<sf::Texture>> textures_ptr;
+	if(direction == Left)
+		textures_ptr = textures.get(TexturesHolder::BirdLeft);
+	else
+		textures_ptr = textures.get(TexturesHolder::BirdRight);
+
+	for(int i(0); i < numFrames; i++) {
+		std::shared_ptr<sf::Texture> texture_ptr{textures_ptr[i]};
+		birds[i].setTexture(*texture_ptr);
+	}
+}
+
+void Bird::setBirdInitialPosition() {
+	if(direction == Right)
+		birds[animationSpriteFrame].setPosition(goThroughArea.left - birds[0].getGlobalBounds().width, 0);
+	else
+		birds[animationSpriteFrame].setPosition(goThroughArea.width, 0);
+
+	int birdHeight = birds[0].getGlobalBounds().height;
 	int yPosition = std::rand()%int(goThroughArea.height - birdHeight) + goThroughArea.top;
 
-	bird.move(0, yPosition);
+	birds[animationSpriteFrame].move(0, yPosition);
+}
+
+bool Bird::isVisible() const {
+	return (!hasBirdCrossedArea() and areProjectilesOutOfScene());
 }
 
 bool Bird::hasBirdCrossedArea() const {
 	bool isOutOfArea = false;
 
+	sf::FloatRect birdBounds = birds[animationSpriteFrame].getGlobalBounds();
 	if(direction == Left) {
-		if(bird.getGlobalBounds().left + bird.getGlobalBounds().width < goThroughArea.left)
+		if(birdBounds.left + birdBounds.width < goThroughArea.left)
 			isOutOfArea = true;
 	}
 	else {
-		if(bird.getGlobalBounds().left > goThroughArea.left + goThroughArea.width)
+		if(birdBounds.left > goThroughArea.left + goThroughArea.width)
 			isOutOfArea = true;
 	}
 
@@ -53,15 +83,23 @@ bool Bird::areProjectilesOutOfScene() const {
 	return areTheyOutOfArea;
 }
 
-bool Bird::isVisible() const {
-	return (!hasBirdCrossedArea() and areProjectilesOutOfScene());
+void Bird::move(int speed) {
+	int formerAnimationSpriteFrame = animationSpriteFrame;
+	setFollowingSpriteFrame();
+
+	birds[animationSpriteFrame].setPosition(birds[formerAnimationSpriteFrame].getPosition());
+
+	if(direction == Left)
+		birds[animationSpriteFrame].move(-speed, 0);
+	else
+		birds[animationSpriteFrame].move(speed, 0);
 }
 
-void Bird::move(int speed) {
-	if(direction == Left)
-		bird.move(-speed, 0);
+void Bird::setFollowingSpriteFrame() {
+	if(animationSpriteFrame < 9)
+		animationSpriteFrame++;
 	else
-		bird.move(speed, 0);
+		animationSpriteFrame = 0;
 }
 
 std::vector<sf::FloatRect> Bird::getProjectileBounds() const {
@@ -77,5 +115,5 @@ void Bird::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 	for(int i(0); i < projectiles.size(); i++)
 		target.draw(projectiles[i], states);
 
-	target.draw(bird, states);
+	target.draw(birds[animationSpriteFrame], states);
 }

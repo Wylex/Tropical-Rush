@@ -4,6 +4,11 @@
 World::World(): window{{windowXSize, windowYSize}, "Tropical Rush"} {
 	bgTexture.loadFromFile("Resources/background.png");
 	background.setTexture(bgTexture);
+
+	texturesHolder.loadSeveralFrames(TexturesHolder::BirdLeft, "Resources/Bird/birdanimationL", 10);
+	texturesHolder.loadSeveralFrames(TexturesHolder::BirdRight, "Resources/Bird/birdanimationR", 10);
+
+	bird.push_back(Bird(texturesHolder, Bird::Direction::Right));
 }
 
 void World::start() {

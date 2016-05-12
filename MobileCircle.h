@@ -5,7 +5,6 @@
 
 class MobileCircle: public sf::Drawable {
 	private:
-		//Rail & Circle
 		sf::Sprite rail;
 		sf::Texture railTexture;
 		sf::Sprite circle;
@@ -20,15 +19,6 @@ class MobileCircle: public sf::Drawable {
 
 		enum {Right, Left} direction;
 
-	private:
-		bool isInsideBounds() const;
-		void changeDirection();
-		void fitInsideBounds();
-
-		void keepCircleInsideRail();
-		void regulateSpeed();
-		void slowDown();
-
 	public:
 		MobileCircle();
 		void setIsMoving(bool mv);
@@ -37,6 +27,16 @@ class MobileCircle: public sf::Drawable {
 		sf::FloatRect getGlobalBounds() const;
 
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
+	private:
+		bool isInsideBounds() const;
+		void fitInsideBounds();
+		void changeDirection();
+		void keepCircleInsideRail();
+
+		double getSpeedPercentage(double distanceToBorder) const;
+		void regulateSpeed();
+		void slowDown();
 };
 
 #endif

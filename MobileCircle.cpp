@@ -33,13 +33,6 @@ bool MobileCircle::isInsideBounds() const {
 	return insideBounds;
 }
 
-void MobileCircle::changeDirection() {
-	if(direction == Left)
-		direction = Right;
-	else
-		direction = Left;
-}
-
 void MobileCircle::fitInsideBounds() {
 	double circleRightCoordinate = circle.getGlobalBounds().left + circle.getGlobalBounds().width;
 	double railRightCoordinate = rail.getGlobalBounds().left + rail.getGlobalBounds().width;
@@ -48,6 +41,13 @@ void MobileCircle::fitInsideBounds() {
 		circle.setPosition(railRightCoordinate - circle.getGlobalBounds().width, circle.getGlobalBounds().top);
 	else if(circle.getGlobalBounds().left < rail.getGlobalBounds().left)
 		circle.setPosition(rail.getGlobalBounds().left, circle.getGlobalBounds().top);
+}
+
+void MobileCircle::changeDirection() {
+	if(direction == Left)
+		direction = Right;
+	else
+		direction = Left;
 }
 
 void MobileCircle::keepCircleInsideRail() {
@@ -66,24 +66,32 @@ void MobileCircle::move() {
 	keepCircleInsideRail();
 }
 
+double MobileCircle::getSpeedPercentage(double distanceToBorder) const {
+	//Percentage from 0 to (100 - minSpeedPercentage) and then
+	//addition of minSpeedPercentage to avoid 0% speed
+	double speedPercentage = distanceToBorder * (100 - minSpeedPercentage) / slowDownZoneSize;
+	speedPercentage += minSpeedPercentage;
+
+	return speedPercentage/100.0;
+}
+
 void MobileCircle::regulateSpeed() {
 	sf::FloatRect circlePosition = circle.getGlobalBounds();
 	sf::FloatRect railPosition = rail.getGlobalBounds();
 
+	double circleRightCoordinate = circlePosition.left + circlePosition.width;
+	double railRightCoordinate = railPosition.left + railPosition.width;
+
 	//Slow down when getting close to borders
 	if((circlePosition.left - railPosition.left) < slowDownZoneSize) {
-		double speedPercentage = (circlePosition.left - railPosition.left) * (100 - minSpeedPercentage) / slowDownZoneSize + minSpeedPercentage;
-		speedPercentage /= 100.0;
-
-		speed = speedPercentage * maxSpeed;
+		double distanceToBorder = circlePosition.left - railPosition.left;
+		speed = getSpeedPercentage(distanceToBorder) * maxSpeed;
 	}
-	else if(circlePosition.left + circlePosition.width > (railPosition.left + railPosition.width) - slowDownZoneSize) {
-		double speedPercentage = (railPosition.left + railPosition.width) - (circlePosition.left + circlePosition.width);
-		speedPercentage = speedPercentage * (100 - minSpeedPercentage) / slowDownZoneSize + minSpeedPercentage;
-		speedPercentage /= 100.0;
-
-		speed = speedPercentage * maxSpeed;
+	else if(circleRightCoordinate > railRightCoordinate - slowDownZoneSize) {
+		double distanceToBorder = railRightCoordinate - circleRightCoordinate;
+		speed = getSpeedPercentage(distanceToBorder) * maxSpeed;
 	}
+	//Max speed in the middle of the rail
 	else
 		speed = maxSpeed;
 }

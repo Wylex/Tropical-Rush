@@ -3,34 +3,42 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include "TexturesHolder.h"
 
 class Bird: public sf::Drawable {
 	public:
 		enum Direction {Left, Right};
 
 	private:
-		sf::Texture birdTexture;
-		sf::Sprite bird;
-
-		sf::Texture projectileTexture;
+		std::vector<sf::Sprite> birds;
 		std::vector<sf::Sprite> projectiles;
-		sf::FloatRect goThroughArea;
+
+		int animationSpriteFrame;
 		Direction direction;
 
-		const sf::FloatRect windowArea;
-
-	private:
-		bool hasBirdCrossedArea() const;
-		bool areProjectilesOutOfScene() const;
+		//To check if the bird and projectiles are out of the scene
+		sf::FloatRect goThroughArea;
+		sf::FloatRect windowArea;
 
 	public:
-		Bird(sf::FloatRect goThroughArea, Direction direction);
+		Bird(const TexturesHolder& textureHolder, Direction direction);
 		void move(int speed);
 		void shoot();
 		bool isVisible() const;
 		std::vector<sf::FloatRect> getProjectileBounds() const;
 
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
+	private:
+		void buildBird(const TexturesHolder& textureHolder);
+		void setSpriteNumber(int numFrames);
+		void setBirdTextures(const TexturesHolder& textures, int numFrames);
+		void setBirdInitialPosition();
+
+		void setFollowingSpriteFrame();
+		bool hasBirdCrossedArea() const;
+		bool areProjectilesOutOfScene() const;
+
 };
 
 #endif
