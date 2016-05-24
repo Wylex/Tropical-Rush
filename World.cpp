@@ -1,14 +1,23 @@
 #include "World.h"
 #include <iostream>
 
-World::World(): window{{windowXSize, windowYSize}, "Tropical Rush"} {
-	bgTexture.loadFromFile("Resources/background.png");
-	background.setTexture(bgTexture);
+World::World(): window{{windowXSize, windowYSize}, "Tropical Rush"}, birdRegulator(texturesHolder, &birds), player(texturesHolder) {
+	loadTextures();
+	//bgTexture.loadFromFile("Resources/background.png");
+	std::vector<std::shared_ptr<sf::Texture>> texture_ptr = texturesHolder.get(TexturesHolder::Background);
 
+	background.setTexture(*(texture_ptr[0]));
+
+	birdRegulator.spawnBird();
+}
+
+void World::loadTextures() {
 	texturesHolder.loadSeveralFrames(TexturesHolder::BirdLeft, "Resources/Bird/birdanimationL", 10);
 	texturesHolder.loadSeveralFrames(TexturesHolder::BirdRight, "Resources/Bird/birdanimationR", 10);
-
-	bird.push_back(Bird(texturesHolder, Bird::Direction::Right));
+	texturesHolder.loadOneFrame(TexturesHolder::Rail, "Resources/rail.png");
+	texturesHolder.loadOneFrame(TexturesHolder::Circle, "Resources/circle.png");
+	texturesHolder.loadOneFrame(TexturesHolder::Background, "Resources/background.png");
+	texturesHolder.loadOneFrame(TexturesHolder::Projectile, "Resources/projectile.png");
 }
 
 void World::start() {
@@ -18,8 +27,18 @@ void World::start() {
 
 		player.update();
 
+		static sf::Clock aa;
+		if(aa.getElapsedTime().asMilliseconds() > 20) {
+			birdRegulator.moveBirds();
+			aa.restart();
+		}
+
+
+		birdRegulator.removeBirdsOutOfScene();
+
 		window.clear();
 		window.draw(background);
+		window.draw(*(birds[0]));
 		window.draw(player);
 		window.display();
 	}

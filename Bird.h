@@ -3,7 +3,9 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
+
 #include "TexturesHolder.h"
+#include "Projectile.h"
 
 class Bird: public sf::Drawable {
 	public:
@@ -11,7 +13,8 @@ class Bird: public sf::Drawable {
 
 	private:
 		std::vector<sf::Sprite> birds;
-		std::vector<sf::Sprite> projectiles;
+		std::vector<Projectile> projectiles;
+		const TexturesHolder* textures;
 
 		int animationSpriteFrame;
 		Direction direction;
@@ -22,17 +25,18 @@ class Bird: public sf::Drawable {
 
 	public:
 		Bird(const TexturesHolder& textureHolder, Direction direction);
-		void move(int speed);
+		void move(double speed);
 		void shoot();
+		void updateProjectilesPosition();
 		bool isVisible() const;
 		std::vector<sf::FloatRect> getProjectileBounds() const;
 
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 	private:
-		void buildBird(const TexturesHolder& textureHolder);
+		void buildBird();
 		void setSpriteNumber(int numFrames);
-		void setBirdTextures(const TexturesHolder& textures, int numFrames);
+		void setBirdTextures(int numFrames);
 		void setBirdInitialPosition();
 
 		void setFollowingSpriteFrame();

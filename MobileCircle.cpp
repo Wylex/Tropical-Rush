@@ -1,22 +1,39 @@
 #include "MobileCircle.h"
 
-MobileCircle::MobileCircle() {
-	//Rail and Circle
-	railTexture.loadFromFile("Resources/rail.png");
-	rail.setTexture(railTexture);
-	circleTexture.loadFromFile("Resources/circle.png");
-	circle.setTexture(circleTexture);
+MobileCircle::MobileCircle(const TexturesHolder& textures) {
+	setTextures(textures);
+	setInitialPosition();
 
-	//Set position
-	const int verticalPosition = 290;
-	const int horizontalPosition = 30;
-	rail.setPosition(horizontalPosition, verticalPosition);
-	circle.setPosition(horizontalPosition + rail.getGlobalBounds().width/2 - circle.getGlobalBounds().width/2, verticalPosition - 8);
-
-	//Initialize variables
 	isMoving = false;
 	speed = 0;
 	direction = Right;
+}
+
+void MobileCircle::setTextures(const TexturesHolder& textures) {
+	//std::vector<std::shared_ptr<sf::Texture>> textures_ptr = textures.get(TexturesHolder::Rail);
+	//rail.setTexture(*(textures_ptr[0]));
+
+	//std::vector<std::shared_ptr<sf::Texture>> textures_ptr2 = textures.get(TexturesHolder::Circle);
+	//textures_ptr = textures.get(TexturesHolder::Circle);
+	//circle.setTexture(*(textures_ptr2[0]));
+
+	//esta linea da error core dumped
+
+	//circle.setTexture(*(texture_ptr[0]));
+
+	railTexture.loadFromFile("Resources/rail.png");
+	circleTexture.loadFromFile("Resources/circle.png");
+
+	rail.setTexture(railTexture);
+	circle.setTexture(circleTexture);
+}
+
+void MobileCircle::setInitialPosition() {
+	const int verticalPosition = 290;
+	const int horizontalPosition = 30;
+
+	rail.setPosition(horizontalPosition, verticalPosition);
+	circle.setPosition(horizontalPosition + rail.getGlobalBounds().width/2 - circle.getGlobalBounds().width/2, verticalPosition - 8);
 }
 
 bool MobileCircle::isInsideBounds() const {

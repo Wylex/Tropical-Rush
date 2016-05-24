@@ -2,13 +2,14 @@
 #define BAR_H
 
 #include <SFML/Graphics.hpp>
+#include "TexturesHolder.h"
 
 class MobileCircle: public sf::Drawable {
 	private:
-		sf::Sprite rail;
 		sf::Texture railTexture;
-		sf::Sprite circle;
 		sf::Texture circleTexture;
+		sf::Sprite rail;
+		sf::Sprite circle;
 
 		const int maxSpeed = 40;
 		const int slowDownZoneSize = 70;
@@ -20,7 +21,7 @@ class MobileCircle: public sf::Drawable {
 		enum {Right, Left} direction;
 
 	public:
-		MobileCircle();
+		MobileCircle(const TexturesHolder& textures);
 		void setIsMoving(bool mv);
 		void move();
 		void update();
@@ -29,6 +30,9 @@ class MobileCircle: public sf::Drawable {
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 	private:
+		void setTextures(const TexturesHolder& textures);
+		void setInitialPosition();
+
 		bool isInsideBounds() const;
 		void fitInsideBounds();
 		void changeDirection();

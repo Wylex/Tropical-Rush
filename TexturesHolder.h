@@ -12,7 +12,7 @@ typedef std::shared_ptr<sf::Texture> Texture_ptr;
 
 class TexturesHolder {
 	public:
-		enum Identifier {BirdRight, BirdLeft, Projectile};
+		enum Identifier {BirdRight, BirdLeft, Projectile, Rail, Circle, Background};
 	private:
 		std::map<Identifier, std::vector<Texture_ptr>> textures;
 

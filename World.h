@@ -4,8 +4,9 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include "MobileCircle.h"
-#include "TexturesHolder.h"
 #include "Bird.h"
+#include "BirdRegulator.h"
+#include "TexturesHolder.h"
 
 class World {
 	private:
@@ -13,11 +14,13 @@ class World {
 		const unsigned int windowYSize = 350;
 
 		sf::Sprite background;
-		sf::Texture bgTexture;
+		//sf::Texture bgTexture;
 
 		sf::RenderWindow window;
 		MobileCircle player;
-		std::vector<Bird> bird;
+
+		std::vector<std::shared_ptr<Bird>> birds;
+		BirdRegulator birdRegulator;
 
 		TexturesHolder texturesHolder;
 
@@ -27,6 +30,7 @@ class World {
 
 	private:
 		void handleInput();
+		void loadTextures();
 };
 
 #endif
